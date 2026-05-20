@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import type { PDFDocumentProxy } from 'pdfjs-dist'
 import { DocumentCanvas } from './components/editor/DocumentCanvas'
 import { InspectorPanel } from './components/editor/InspectorPanel'
@@ -6,10 +6,12 @@ import { ToolRail } from './components/editor/ToolRail'
 import { EmptyState } from './components/onboarding/EmptyState'
 import { ErrorBanner } from './components/shell/ErrorBanner'
 import { TopBar } from './components/shell/TopBar'
+import { detectNearbyTextStyle, getEditorFontOptions, logDetectedFont } from './lib/fontMatching'
 import { exportPdfWithOverlays } from './lib/pdfExport'
 import { loadPdfFile } from './lib/pdfLoader'
 import { getInitialOnboardingState, persistOnboardingStep } from './lib/onboarding'
 import type { OnboardingState, Overlay, PageInfo, Tool } from './types/editor'
+import type { PdfTextItem } from './types/pdfText'
 
 function App() {
   const [pdfBytes, setPdfBytes] = useState<Uint8Array | null>(null)
@@ -19,10 +21,22 @@ function App() {
   const [zoom, setZoom] = useState(1)
   const [tool, setTool] = useState<Tool>('select')
   const [overlays, setOverlays] = useState<Overlay[]>([])
+  const [pdfTextItems, setPdfTextItems] = useState<PdfTextItem[]>([])
+  const [pdfColorPalette, setPdfColorPalette] = useState<string[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [isExporting, setIsExporting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [onboarding, setOnboarding] = useState(getInitialOnboardingState)
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key !== 'Escape') return
+      setSelectedId(null)
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   const markOnboardingStep = useCallback((key: keyof OnboardingState) => {
     persistOnboardingStep(key)
@@ -41,6 +55,8 @@ function App() {
       setPdfDocument(loadedPdf.document)
       setFileName(file.name)
       setPages(loadedPdf.pages)
+      setPdfTextItems(loadedPdf.textItems)
+      setPdfColorPalette(loadedPdf.colorPalette)
       setOverlays([])
       setSelectedId(null)
       markOnboardingStep('importedPdf')
@@ -53,7 +69,10 @@ function App() {
   const addOverlay = (page: number, x: number, y: number) => {
     if (tool === 'select') return
 
-    const overlay: Overlay = createOverlay(tool, page, x, y)
+    const detectedStyle = tool === 'text' ? detectNearbyTextStyle({ page, x, y, textItems: pdfTextItems }) : null
+    if (detectedStyle) logDetectedFont(detectedStyle)
+
+    const overlay: Overlay = createOverlay(tool, page, x, y, detectedStyle)
 
     setOverlays((current) => [...current, overlay])
     setSelectedId(overlay.id)
@@ -111,6 +130,8 @@ function App() {
             zoom={zoom}
             activeTool={tool}
             overlays={overlays}
+            fontOptions={getEditorFontOptions(pdfTextItems)}
+            pdfColorPalette={pdfColorPalette}
             selectedId={selectedId}
             onZoomChange={setZoom}
             onSelect={setSelectedId}
@@ -129,7 +150,7 @@ function App() {
   )
 }
 
-function createOverlay(tool: Exclude<Tool, 'select'>, page: number, x: number, y: number): Overlay {
+function createOverlay(tool: Exclude<Tool, 'select'>, page: number, x: number, y: number, detectedStyle: ReturnType<typeof detectNearbyTextStyle>): Overlay {
   if (tool === 'text') {
     return {
       id: crypto.randomUUID(),
@@ -138,9 +159,17 @@ function createOverlay(tool: Exclude<Tool, 'select'>, page: number, x: number, y
       x,
       y,
       w: 180,
-      h: 40,
+      h: Math.max(40, (detectedStyle?.fontSize ?? 16) * 1.6),
       text: 'Type here',
-      fontSize: 16,
+      fontSize: detectedStyle?.fontSize ?? 16,
+      fontFamily: detectedStyle?.matchedFont.family,
+      fontWeight: detectedStyle?.matchedFont.weight,
+      fontStyle: detectedStyle?.matchedFont.style,
+      sourceFontName: detectedStyle?.matchedFont.sourceFontName,
+      textColor: '#1f2229',
+      opacity: 1,
+      underline: false,
+      listStyle: 'none',
     }
   }
 
@@ -153,6 +182,10 @@ function createOverlay(tool: Exclude<Tool, 'select'>, page: number, x: number, y
       y,
       w: 160,
       h: 34,
+      backgroundColor: '#fbfbfa',
+      borderColor: 'transparent',
+      borderWidth: 0,
+      borderRadius: 0,
     }
   }
 

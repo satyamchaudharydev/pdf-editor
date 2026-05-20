@@ -1,5 +1,5 @@
 import type { PDFDocumentProxy } from 'pdfjs-dist'
-import type { Overlay, PageInfo, Tool } from '../../types/editor'
+import type { FontOption, Overlay, PageInfo, Tool } from '../../types/editor'
 import { PdfPage } from '../pdf/PdfPage'
 import { ZoomBar } from './ZoomBar'
 
@@ -9,6 +9,8 @@ export type DocumentCanvasProps = {
   zoom: number
   activeTool: Tool
   overlays: Overlay[]
+  fontOptions: FontOption[]
+  pdfColorPalette: string[]
   selectedId: string | null
   onZoomChange: (updater: (current: number) => number) => void
   onSelect: (id: string | null) => void
@@ -22,6 +24,8 @@ export function DocumentCanvas({
   zoom,
   activeTool,
   overlays,
+  fontOptions,
+  pdfColorPalette,
   selectedId,
   onZoomChange,
   onSelect,
@@ -41,6 +45,8 @@ export function DocumentCanvas({
             zoom={zoom}
             activeTool={activeTool}
             overlays={overlays.filter((item) => item.page === page.pageNumber)}
+            fontOptions={fontOptions}
+            pdfColorPalette={pdfColorPalette}
             selectedId={selectedId}
             onSelect={onSelect}
             onAdd={onAddOverlay}
