@@ -1,119 +1,77 @@
-# PDF Editor Tasks
+# PDF Editor Feature Checklist
 
-Use this file as the project checklist. Mark completed work with `[x]` and upcoming work with `[ ]`.
+Track product features only. Use `[x]` for completed features and `[ ]` for pending features.
 
-## Completed
+## Core PDF Flow
 
-- [x] Research PDF editor product landscape and implementation strategy
-- [x] Choose initial tech stack: React, TypeScript, Vite, Tailwind, Framer Motion, pdf.js, pdf-lib
-- [x] Create product context in `PRODUCT.md`
-- [x] Set up Vite React TypeScript project
-- [x] Add Tailwind CSS
-- [x] Add Framer Motion
-- [x] Implement local PDF import
-- [x] Render PDF pages with pdf.js
-- [x] Add zoom controls
-- [x] Add basic editor shell: top bar, tool rail, canvas area, inspector panel
-- [x] Add onboarding empty state and quick-start checklist
-- [x] Add text overlay tool
-- [x] Add whiteout overlay tool
-- [x] Add highlight overlay tool
-- [x] Add basic select tool for overlay selection
-- [x] Add drag support for overlays
-- [x] Add inspector controls for selected overlays
-- [x] Add delete selected overlay action
-- [x] Export edited PDF with overlays using pdf-lib
-- [x] Refactor large `App.tsx` into focused components
-- [x] Move shared editor types into `src/types/editor.ts`
-- [x] Move PDF loading/export logic into `src/lib`
-- [x] Initialize git repository
-- [x] Push project to GitHub
-
-## Next Priority
-
-- [ ] Add resize handles for overlays
-- [ ] Add keyboard delete/backspace for selected overlay
-- [ ] Add undo/redo history
-- [ ] Add page thumbnails sidebar
-- [ ] Add page navigation controls
-- [ ] Improve text overlay editing UX
-- [ ] Add image insertion tool
-- [ ] Add signature tool
-- [ ] Add freehand drawing tool
-- [ ] Add export progress/loading state
-- [ ] Add import/export error handling
-- [ ] Add toast notifications
-- [ ] Add keyboard shortcuts
-- [ ] Add save project/session state locally
-
-## Rendering
-
-- [x] Render PDF pages as canvas
-- [ ] Add page virtualization for large PDFs
-- [ ] Add text layer support for selection/search
-- [ ] Add search inside PDF
-- [ ] Add rotate page view
-- [ ] Improve high-DPI rendering performance
-
-## Editing
-
-- [x] Overlay-based editing model
-- [x] Text overlay
-- [x] Whiteout overlay
-- [x] Highlight overlay
-- [x] Drag overlays
-- [ ] Resize overlays
-- [ ] Rotate overlays
-- [ ] Duplicate overlays
-- [ ] Multi-select overlays
-- [ ] Marquee selection
-- [ ] Snap to page edges/text baselines
-- [ ] Alignment guides
-- [ ] Copy/paste overlays
-- [ ] Lock/unlock overlays
-
-## Export
-
+- [x] Import PDF locally
+- [x] Render PDF pages
+- [x] Zoom in and out
 - [x] Export edited PDF locally
-- [x] Flatten text, whiteout, and highlight overlays into final PDF
-- [ ] Preserve custom fonts for text overlays
-- [ ] Support image export
-- [ ] Support drawing/signature export
-- [ ] Add export quality options
-- [ ] Add filename controls
+- [ ] Show export loading state
+- [ ] Show import/export errors
+- [ ] Save and restore local editing session
 
-## UX and Onboarding
+## Editing Tools
 
-- [x] Empty state: drag/drop or choose PDF
-- [x] Local-first privacy message
+- [x] Select edits
+- [x] Add text
+- [x] Add whiteout block
+- [x] Add highlight block
+- [x] Move edits by dragging
+- [x] Delete selected edit
+- [ ] Resize edits
+- [ ] Rotate edits
+- [ ] Duplicate edits
+- [ ] Copy and paste edits
+- [ ] Multi-select edits
+- [ ] Add image
+- [ ] Add signature
+- [ ] Draw freehand
+- [ ] Add shapes
+- [ ] Add arrows and lines
+
+## Text Editing
+
+- [x] Edit overlay text
+- [x] Change text size
+- [ ] Change text color
+- [ ] Change text font
+- [ ] Auto-size text box
+- [ ] Match nearby PDF text style
+
+## Navigation
+
+- [ ] Page thumbnails
+- [ ] Page navigation controls
+- [ ] Jump to page
+- [ ] Search PDF text
+- [ ] Select/copy original PDF text
+
+## Onboarding and UX
+
+- [x] Drag and drop PDF empty state
 - [x] Quick-start checklist
-- [ ] First-time contextual hints
+- [x] Local-first privacy message
+- [ ] First-time tool hints
 - [ ] Sample PDF option
-- [ ] Help/shortcuts panel
-- [ ] Better selected-state affordances
-- [ ] Better mobile/tablet responsive layout
+- [ ] Keyboard shortcuts
+- [ ] Undo and redo
+- [ ] Toast notifications
 
-## Code Quality
+## Page Operations
 
-- [x] Component-based structure
-- [x] Shared types separated where reused
-- [x] PDF logic separated from UI components
-- [ ] Add ESLint and Prettier
-- [ ] Add path aliases
-- [ ] Add unit tests for lib functions
-- [ ] Add component tests for editor interactions
-- [ ] Add stricter PDF document typing where possible
-- [ ] Code-split pdf.js/pdf-lib to reduce initial bundle size
-
-## Future Advanced Features
-
-- [ ] Fill PDF forms
-- [ ] OCR for scanned PDFs
-- [ ] Redaction mode
-- [ ] Merge PDFs
-- [ ] Split PDFs
+- [ ] Rotate pages
 - [ ] Reorder pages
 - [ ] Delete pages
+- [ ] Merge PDFs
+- [ ] Split PDF
 - [ ] Compress PDF
-- [ ] Desktop packaging with Tauri
+
+## Advanced
+
+- [ ] Fill PDF forms
+- [ ] Redact content
+- [ ] OCR scanned PDFs
 - [ ] True PDF text editing for simple cases
+- [ ] Desktop app
