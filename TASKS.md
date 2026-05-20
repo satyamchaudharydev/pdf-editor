@@ -8,8 +8,8 @@ Track product features only. Use `[x]` for completed features and `[ ]` for pend
 - [x] Render PDF pages
 - [x] Zoom in and out
 - [x] Export edited PDF locally
-- [ ] Show export loading state
-- [ ] Show import/export errors
+- [x] Show export loading state
+- [x] Show import/export errors
 - [ ] Save and restore local editing session
 
 ## Editing Tools
@@ -20,7 +20,7 @@ Track product features only. Use `[x]` for completed features and `[ ]` for pend
 - [x] Add highlight block
 - [x] Move edits by dragging
 - [x] Delete selected edit
-- [ ] Resize edits
+- [x] Resize edits
 - [ ] Rotate edits
 - [ ] Duplicate edits
 - [ ] Copy and paste edits

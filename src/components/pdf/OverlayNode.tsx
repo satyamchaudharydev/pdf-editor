@@ -11,6 +11,7 @@ export type OverlayNodeProps = {
 
 export function OverlayNode({ overlay, zoom, selected, onSelect, onUpdate }: OverlayNodeProps) {
   const dragStart = useRef<{ x: number; y: number; ox: number; oy: number } | null>(null)
+  const resizeStart = useRef<{ x: number; y: number; ow: number; oh: number } | null>(null)
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     event.stopPropagation()
@@ -33,6 +34,27 @@ export function OverlayNode({ overlay, zoom, selected, onSelect, onUpdate }: Ove
     })
   }
 
+  const handleResizePointerDown = (event: React.PointerEvent<HTMLButtonElement>) => {
+    event.stopPropagation()
+    onSelect(overlay.id)
+    resizeStart.current = {
+      x: event.clientX,
+      y: event.clientY,
+      ow: overlay.w,
+      oh: overlay.h,
+    }
+    event.currentTarget.setPointerCapture(event.pointerId)
+  }
+
+  const handleResizePointerMove = (event: React.PointerEvent<HTMLButtonElement>) => {
+    if (!resizeStart.current) return
+
+    onUpdate(overlay.id, {
+      w: Math.max(24, resizeStart.current.ow + (event.clientX - resizeStart.current.x) / zoom),
+      h: Math.max(16, resizeStart.current.oh + (event.clientY - resizeStart.current.y) / zoom),
+    })
+  }
+
   return (
     <div
       onPointerDown={handlePointerDown}
@@ -45,7 +67,7 @@ export function OverlayNode({ overlay, zoom, selected, onSelect, onUpdate }: Ove
         left: overlay.x * zoom,
         top: overlay.y * zoom,
         width: overlay.w * zoom,
-        minHeight: overlay.h * zoom,
+        height: overlay.h * zoom,
       }}
     >
       {overlay.kind === 'text' && (
@@ -63,6 +85,19 @@ export function OverlayNode({ overlay, zoom, selected, onSelect, onUpdate }: Ove
 
       {overlay.kind === 'whiteout' && <div className="h-full w-full border border-[oklch(0.84_0.01_255)] bg-[oklch(0.985_0.004_255)]" />}
       {overlay.kind === 'highlight' && <div className="h-full w-full bg-[oklch(0.88_0.16_92)]/45" />}
+
+      {selected && (
+        <button
+          type="button"
+          aria-label="Resize edit"
+          onPointerDown={handleResizePointerDown}
+          onPointerMove={handleResizePointerMove}
+          onPointerUp={() => {
+            resizeStart.current = null
+          }}
+          className="absolute -bottom-2 -right-2 size-4 cursor-nwse-resize rounded-full border border-paper bg-accent shadow-sm"
+        />
+      )}
     </div>
   )
 }

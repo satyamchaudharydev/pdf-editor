@@ -1,13 +1,14 @@
-import { Download, FilePlus2 } from 'lucide-react'
+import { Download, FilePlus2, LoaderCircle } from 'lucide-react'
 
 export type TopBarProps = {
   fileName: string | null
   canExport: boolean
+  isExporting: boolean
   onFileInput: (event: React.ChangeEvent<HTMLInputElement>) => void
   onExport: () => void
 }
 
-export function TopBar({ fileName, canExport, onFileInput, onExport }: TopBarProps) {
+export function TopBar({ fileName, canExport, isExporting, onFileInput, onExport }: TopBarProps) {
   return (
     <header className="flex h-14 items-center justify-between border-b border-line bg-paper px-4">
       <div className="flex items-center gap-3">
@@ -26,11 +27,12 @@ export function TopBar({ fileName, canExport, onFileInput, onExport }: TopBarPro
           <input type="file" accept="application/pdf" className="hidden" onChange={onFileInput} />
         </label>
         <button
-          disabled={!canExport}
+          disabled={!canExport || isExporting}
           onClick={onExport}
           className="inline-flex items-center gap-2 rounded-lg bg-ink px-3 py-2 text-sm font-medium text-paper disabled:cursor-not-allowed disabled:opacity-40"
         >
-          <Download size={16} /> Export
+          {isExporting ? <LoaderCircle size={16} className="animate-spin" /> : <Download size={16} />}
+          {isExporting ? 'Exporting' : 'Export'}
         </button>
       </div>
     </header>

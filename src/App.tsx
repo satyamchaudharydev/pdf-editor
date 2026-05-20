@@ -4,6 +4,7 @@ import { DocumentCanvas } from './components/editor/DocumentCanvas'
 import { InspectorPanel } from './components/editor/InspectorPanel'
 import { ToolRail } from './components/editor/ToolRail'
 import { EmptyState } from './components/onboarding/EmptyState'
+import { ErrorBanner } from './components/shell/ErrorBanner'
 import { TopBar } from './components/shell/TopBar'
 import { exportPdfWithOverlays } from './lib/pdfExport'
 import { loadPdfFile } from './lib/pdfLoader'
@@ -19,6 +20,8 @@ function App() {
   const [tool, setTool] = useState<Tool>('select')
   const [overlays, setOverlays] = useState<Overlay[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [isExporting, setIsExporting] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [onboarding, setOnboarding] = useState(getInitialOnboardingState)
 
   const markOnboardingStep = useCallback((key: keyof OnboardingState) => {
@@ -30,15 +33,21 @@ function App() {
     const file = event.target.files?.[0]
     if (!file) return
 
-    const loadedPdf = await loadPdfFile(file)
+    try {
+      setErrorMessage(null)
+      const loadedPdf = await loadPdfFile(file)
 
-    setPdfBytes(loadedPdf.bytes)
-    setPdfDocument(loadedPdf.document)
-    setFileName(file.name)
-    setPages(loadedPdf.pages)
-    setOverlays([])
-    setSelectedId(null)
-    markOnboardingStep('importedPdf')
+      setPdfBytes(loadedPdf.bytes)
+      setPdfDocument(loadedPdf.document)
+      setFileName(file.name)
+      setPages(loadedPdf.pages)
+      setOverlays([])
+      setSelectedId(null)
+      markOnboardingStep('importedPdf')
+    } catch {
+      setErrorMessage('This PDF could not be opened. Try another file or a non-password-protected PDF.')
+      event.currentTarget.value = ''
+    }
   }
 
   const addOverlay = (page: number, x: number, y: number) => {
@@ -66,15 +75,30 @@ function App() {
   const exportPdf = async () => {
     if (!pdfBytes) return
 
-    await exportPdfWithOverlays({ pdfBytes, overlays, fileName })
-    markOnboardingStep('exportedPdf')
+    try {
+      setIsExporting(true)
+      setErrorMessage(null)
+      await exportPdfWithOverlays({ pdfBytes, overlays, fileName })
+      markOnboardingStep('exportedPdf')
+    } catch {
+      setErrorMessage('Export failed. Please try again.')
+    } finally {
+      setIsExporting(false)
+    }
   }
 
   const selectedOverlay = overlays.find((item) => item.id === selectedId)
 
   return (
     <div className="min-h-screen bg-paper text-ink antialiased">
-      <TopBar fileName={pdfBytes ? fileName : null} onFileInput={handleFileInput} onExport={exportPdf} canExport={Boolean(pdfBytes)} />
+      <TopBar
+        fileName={pdfBytes ? fileName : null}
+        onFileInput={handleFileInput}
+        onExport={exportPdf}
+        canExport={Boolean(pdfBytes)}
+        isExporting={isExporting}
+      />
+      {errorMessage && <ErrorBanner message={errorMessage} onDismiss={() => setErrorMessage(null)} />}
 
       {!pdfBytes || !pdfDocument ? (
         <EmptyState onFileInput={handleFileInput} />
