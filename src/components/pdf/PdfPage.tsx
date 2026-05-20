@@ -1,12 +1,13 @@
 import { useEffect, useRef } from 'react'
 import type { PDFDocumentProxy } from 'pdfjs-dist'
-import type { Overlay, PageInfo } from '../../types/editor'
+import type { Overlay, PageInfo, Tool } from '../../types/editor'
 import { OverlayNode } from './OverlayNode'
 
 export type PdfPageProps = {
   document: PDFDocumentProxy
   page: PageInfo
   zoom: number
+  activeTool: Tool
   overlays: Overlay[]
   selectedId: string | null
   onSelect: (id: string | null) => void
@@ -14,7 +15,7 @@ export type PdfPageProps = {
   onUpdate: (id: string, patch: Partial<Overlay>) => void
 }
 
-export function PdfPage({ document, page, zoom, overlays, selectedId, onSelect, onAdd, onUpdate }: PdfPageProps) {
+export function PdfPage({ document, page, zoom, activeTool, overlays, selectedId, onSelect, onAdd, onUpdate }: PdfPageProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -51,18 +52,22 @@ export function PdfPage({ document, page, zoom, overlays, selectedId, onSelect, 
     if (event.target !== event.currentTarget) return
 
     const rect = event.currentTarget.getBoundingClientRect()
+
+    if (activeTool === 'select') {
+      onSelect(null)
+      return
+    }
+
     onAdd(page.pageNumber, (event.clientX - rect.left) / zoom, (event.clientY - rect.top) / zoom)
-    onSelect(null)
   }
 
   return (
     <div
       className="relative shadow-editor"
       style={{ width: page.width * zoom, height: page.height * zoom }}
-      onMouseDown={handleMouseDown}
     >
       <canvas ref={canvasRef} className="absolute inset-0 bg-[oklch(0.985_0.004_255)]" />
-      <div className="absolute inset-0">
+      <div className="absolute inset-0" onMouseDown={handleMouseDown}>
         {overlays.map((overlay) => (
           <OverlayNode
             key={overlay.id}

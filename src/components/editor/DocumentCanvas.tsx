@@ -39,6 +39,7 @@ export function DocumentCanvas({
             document={document}
             page={page}
             zoom={zoom}
+            activeTool={activeTool}
             overlays={overlays.filter((item) => item.page === page.pageNumber)}
             selectedId={selectedId}
             onSelect={onSelect}
